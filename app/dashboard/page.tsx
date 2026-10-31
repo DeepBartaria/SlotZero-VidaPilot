@@ -4,6 +4,7 @@ import { useState, useEffect, useCallback, useMemo } from "react";
 import { useRouter } from "next/navigation";
 import Image from "next/image";
 import Link from "next/link";
+import TaraAssistant from "@/components/TaraAssistant";
 import {
   Calendar,
   Clock,
@@ -2458,6 +2459,18 @@ export default function DashboardPage() {
             </div>
           </div>
         </div>
+      )}
+
+      {/* TARA AI POWERED ASSISTANT (TOOL CALLING) */}
+      {currentUser && currentUser.role === "PATIENT" && (
+        <TaraAssistant
+          currentUser={currentUser}
+          onBookingConfirmed={() => {
+            loadAllData();
+            fetchAvailableSlots();
+            setActiveTab("my_appointments");
+          }}
+        />
       )}
 
       {/* FOOTER */}
