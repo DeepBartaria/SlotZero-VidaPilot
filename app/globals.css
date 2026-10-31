@@ -1,0 +1,233 @@
+@import "tailwindcss";
+
+/* Enable class-based dark mode for Tailwind v4 (next-themes adds `.dark` to <html>) */
+@custom-variant dark (&:where(.dark, .dark *));
+
+/* ==========================================================================
+   AssetFlow design system - light "Odoo" theme, codified as tokens.
+   Source of truth for surfaces, borders, accent, radii and status colors.
+   See plans/design.md sec 5 and plans/FRONTEND.md sec 5.
+   ========================================================================== */
+
+/* ---- Brand scale (kept for existing screens; do not remove) ------------- */
+@theme inline {
+  --color-odoo-50: #fbf9fa;
+  --color-odoo-100: #f5f0f3;
+  --color-odoo-200: #eadde6;
+  --color-odoo-300: #d6bccc;
+  --color-odoo-400: #ba91ab;
+  --color-odoo-500: #9e6d8f;
+  --color-odoo-600: #714B67; /* Official Odoo Purple */
+  --color-odoo-700: #6a4060;
+  --color-odoo-800: #593551;
+  --color-odoo-900: #4b3045;
+}
+
+/* ---- Semantic theme tokens (Tailwind utilities: bg-accent, text-accent…) - */
+@theme inline {
+  --color-primary-500: #10b981; /* Emerald 500 */
+  --color-primary-600: #059669; /* Emerald 600 */
+
+  /* Accent = emerald (primary actions, active nav, positive) */
+  --color-accent: #059669;        /* emerald-600 */
+  --color-accent-strong: #047857; /* emerald-700 (hover/pressed) */
+  --color-accent-soft: #ecfdf5;   /* emerald-50  (tinted backgrounds) */
+
+  --color-danger: #ef4444;  /* Red 500  - overdue, blocked, reject */
+  --color-warning: #f59e0b; /* Amber 500 - discrepancy, due-soon */
+
+  /* Prefer the Geist font wired in app/layout.tsx, fall back gracefully */
+  --font-sans: var(--font-geist-sans), 'Inter', system-ui, sans-serif;
+  --font-mono: var(--font-geist-mono), ui-monospace, monospace;
+}
+
+/* ---- Semantic CSS variables (documentation + non-Tailwind consumers) ----- */
+:root {
+  --background: #ffffff; /* Crisp White */
+  --foreground: #0f172a; /* Slate 900 */
+
+  /* Surfaces */
+  --surface: #ffffff;
+  --surface-muted: #f8fafc;  /* slate-50  */
+  --surface-subtle: #f1f5f9; /* slate-100 */
+
+  /* Borders */
+  --border-color: #e2e8f0;        /* slate-200 */
+  --border-strong: #cbd5e1;       /* slate-300 */
+
+  /* Text */
+  --text: #0f172a;        /* slate-900 */
+  --text-muted: #64748b;  /* slate-500 */
+  --text-subtle: #94a3b8; /* slate-400 */
+
+  /* Accent */
+  --accent: #059669;
+  --accent-strong: #047857;
+  --accent-soft: #ecfdf5;
+
+  /* Radii (8px base grid; panels 2xl, chips full, inputs xl) */
+  --radius-sm: 0.5rem;
+  --radius: 0.75rem;
+  --radius-lg: 1rem;
+  --radius-xl: 1.25rem;
+  --radius-2xl: 1.5rem;
+
+  /* Status palette (single source; StatusChip maps token -> classes) */
+  --status-available: #10b981;         /* emerald */
+  --status-allocated: #0ea5e9;         /* sky     */
+  --status-reserved: #6366f1;          /* indigo  */
+  --status-under_maintenance: #f59e0b; /* amber   */
+  --status-lost: #ef4444;              /* red     */
+  --status-retired: #71717a;           /* zinc    */
+  --status-disposed: #52525b;          /* zinc    */
+}
+
+body {
+  background: var(--background);
+  color: var(--foreground);
+  font-family: var(--font-sans);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* Subtle standard card shadow for a clean look */
+.card-shadow {
+  box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px -1px rgba(0, 0, 0, 0.1);
+}
+
+.card-shadow-lg {
+  box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.05), 0 8px 10px -6px rgba(0, 0, 0, 0.01);
+}
+
+/* Accessible focus ring using the accent token */
+:where(a, button, input, select, textarea, [tabindex]):focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+
+/* Respect reduced-motion globally as a safety net (components also guard) */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+/* ==========================================================================
+   DARK MODE
+   --------------------------------------------------------------------------
+   Retrofit dark styling for the dashboard without editing every page.
+   Everything is scoped to `.dark .dash-shell` so the always-dark marketing
+   and login screens (which live outside the dashboard layout) are untouched.
+   Background is pure black; borders/dividers are intentionally low-contrast
+   ("less visible" lines). Semantic status colors are left as-is.
+   ========================================================================== */
+
+.dark {
+  --background: #000000;
+  --foreground: #f8fafc;
+}
+
+.dark .dash-shell {
+  /* Layered dark surfaces so cards stay distinguishable on a black page */
+  --dm-page: #000000;      /* outer page / main scroll area          */
+  --dm-rail: #0a0a0c;      /* sidebar rail                            */
+  --dm-surface: #131317;   /* cards, panels, buttons (was bg-white)   */
+  --dm-surface-2: #1b1b21; /* inputs, muted fills (was bg-slate-50)   */
+  --dm-surface-3: #26262d; /* stronger fills (was bg-slate-200/300)   */
+  --dm-line: rgba(255, 255, 255, 0.08); /* subtle, less-visible lines */
+  --dm-line-hover: rgba(255, 255, 255, 0.16);
+
+  --dm-text: #f8fafc;      /* headings                                */
+  --dm-text-2: #e2e8f0;    /* strong body                             */
+  --dm-text-3: #cbd5e1;    /* body                                    */
+  --dm-text-4: #aab2c0;    /* secondary                               */
+  --dm-text-5: #949dac;    /* muted labels                            */
+  --dm-text-6: #7f8896;    /* faint                                   */
+
+  color: var(--dm-text-2);
+}
+
+/* ---- Page / rail / main backgrounds ------------------------------------ */
+.dark .dash-shell .bg-\[\#ffffff\],
+.dark .dash-shell .bg-slate-50\/50,
+.dark .dash-shell .bg-slate-55\/50 { background-color: var(--dm-page) !important; }
+
+.dark .dash-shell .bg-\[\#f8fafc\] { background-color: var(--dm-rail) !important; }
+
+/* ---- Card / panel / button surfaces ------------------------------------ */
+.dark .dash-shell .bg-white,
+.dark .dash-shell .focus\:bg-white:focus { background-color: var(--dm-surface) !important; }
+
+/* ---- Muted fills (inputs, chips, hovers) ------------------------------- */
+.dark .dash-shell .bg-slate-50,
+.dark .dash-shell .bg-slate-55,
+.dark .dash-shell .bg-slate-100,
+.dark .dash-shell .bg-slate-100\/75 { background-color: var(--dm-surface-2) !important; }
+
+.dark .dash-shell .bg-slate-200,
+.dark .dash-shell .bg-slate-300,
+.dark .dash-shell .bg-slate-400 { background-color: var(--dm-surface-3) !important; }
+
+/* ---- Hover background feedback (kept, just darkened) ------------------- */
+.dark .dash-shell .hover\:bg-slate-50:hover,
+.dark .dash-shell .hover\:bg-slate-50\/20:hover,
+.dark .dash-shell .hover\:bg-slate-50\/30:hover,
+.dark .dash-shell .hover\:bg-slate-50\/50:hover,
+.dark .dash-shell .hover\:bg-slate-55:hover,
+.dark .dash-shell .hover\:bg-slate-100:hover,
+.dark .dash-shell .hover\:bg-slate-100\/50:hover { background-color: var(--dm-surface-2) !important; }
+
+.dark .dash-shell .hover\:bg-slate-200:hover,
+.dark .dash-shell .hover\:bg-slate-200\/50:hover { background-color: var(--dm-surface-3) !important; }
+
+/* ---- Text tiers -------------------------------------------------------- */
+.dark .dash-shell .text-slate-900,
+.dark .dash-shell .text-slate-905,
+.dark .dash-shell .text-slate-950,
+.dark .dash-shell .text-slate-955,
+.dark .dash-shell .hover\:text-slate-900:hover { color: var(--dm-text) !important; }
+
+.dark .dash-shell .text-slate-800,
+.dark .dash-shell .hover\:text-slate-800:hover { color: var(--dm-text-2) !important; }
+
+.dark .dash-shell .text-slate-700,
+.dark .dash-shell .text-slate-650,
+.dark .dash-shell .text-slate-655 { color: var(--dm-text-3) !important; }
+
+.dark .dash-shell .text-slate-600,
+.dark .dash-shell .text-slate-550,
+.dark .dash-shell .hover\:text-slate-600:hover { color: var(--dm-text-4) !important; }
+
+.dark .dash-shell .text-slate-500,
+.dark .dash-shell .text-slate-450 { color: var(--dm-text-5) !important; }
+
+.dark .dash-shell .text-slate-400,
+.dark .dash-shell .text-slate-300 { color: var(--dm-text-6) !important; }
+
+/* ---- Borders & dividers: subtle, less-visible lines -------------------- */
+.dark .dash-shell .border-slate-100,
+.dark .dash-shell .border-slate-200,
+.dark .dash-shell .border-slate-200\/60,
+.dark .dash-shell .border-slate-200\/80,
+.dark .dash-shell .border-slate-250,
+.dark .dash-shell .border-slate-300,
+.dark .dash-shell .border-slate-350 { border-color: var(--dm-line) !important; }
+
+.dark .dash-shell .hover\:border-slate-300:hover { border-color: var(--dm-line-hover) !important; }
+
+.dark .dash-shell .divide-slate-100 > :not([hidden]) ~ :not([hidden]) { border-color: var(--dm-line) !important; }
+
+/* ---- Placeholders stay readable on dark inputs ------------------------- */
+.dark .dash-shell input::placeholder,
+.dark .dash-shell textarea::placeholder { color: var(--dm-text-6) !important; }
+
+/* ---- Elevated shadows read better as a hairline glow in the dark ------- */
+.dark .dash-shell .card-shadow,
+.dark .dash-shell .card-shadow-lg {
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.6), 0 0 0 1px rgba(255, 255, 255, 0.04);
+}
