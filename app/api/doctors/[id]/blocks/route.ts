@@ -3,6 +3,8 @@ import { db } from "@/lib/db";
 import { getSessionUser } from "@/lib/auth";
 import { parseLocalToUtc } from "@/lib/timezone";
 
+export const dynamic = "force-dynamic";
+
 export async function GET(
   request: Request,
   { params }: { params: Promise<{ id: string }> }

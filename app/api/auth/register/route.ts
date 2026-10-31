@@ -4,6 +4,8 @@ import { db } from "@/lib/db";
 import { SESSION_COOKIE_NAME } from "@/lib/auth";
 import { isValidTimeZone } from "@/lib/timezone";
 
+export const dynamic = "force-dynamic";
+
 export async function POST(request: Request) {
   try {
     const body = await request.json();

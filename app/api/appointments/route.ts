@@ -4,6 +4,8 @@ import { db } from "@/lib/db";
 import { getSessionUser } from "@/lib/auth";
 import { formatToLocalTime } from "@/lib/timezone";
 
+export const dynamic = "force-dynamic";
+
 export async function GET(request: Request) {
   try {
     const sessionUser = await getSessionUser(request);

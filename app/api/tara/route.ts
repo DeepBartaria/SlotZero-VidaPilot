@@ -4,6 +4,8 @@ import { getSessionUser } from "@/lib/auth";
 import { formatToLocalTime, parseLocalToUtc } from "@/lib/timezone";
 import { Prisma } from "@prisma/client";
 
+export const dynamic = "force-dynamic";
+
 // Tara AI Tool Definitions
 const TARA_TOOLS = [
   {
