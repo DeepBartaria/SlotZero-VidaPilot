@@ -1,5 +1,5 @@
-// Prisma schema for PostgreSQL database
-// Learn more: https://pris.ly/d/prisma-schema
+// Prisma schema for MedaVida SlotZero database
+// PostgreSQL with full relational models, audit logging, and scheduling constraints
 
 generator client {
   provider = "prisma-client-js"
@@ -10,29 +10,82 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-// Example starter models ready for your hackathon (customize as needed):
-
 model User {
-  id        String    @id @default(cuid())
-  email     String    @unique
-  name      String?
-  role      String    @default("USER")
-  createdAt DateTime  @default(now())
-  updatedAt DateTime  @updatedAt
-  orders    Order[]
+  id                  String              @id @default(cuid())
+  email               String              @unique
+  password            String              @default("password123")
+  name                String
+  role                String              // "DOCTOR" | "PATIENT"
+  timeZone            String              // "Europe/London" | "America/New_York" | "Asia/Kolkata"
+  specialty           String?             // e.g. "General Physician", "Internal Medicine"
+  avatar              String?
+  location            String?             // e.g. "London, UK", "Kolkata, India", "New York, USA"
+  
+  // Relations
+  doctorAppointments  Appointment[]       @relation("DoctorAppointments")
+  patientAppointments Appointment[]       @relation("PatientAppointments")
+  schedules           DoctorSchedule[]
+  blockedTimes        DoctorBlockedTime[]
+  auditLogs           AuditLog[]
+
+  createdAt           DateTime            @default(now())
+  updatedAt           DateTime            @updatedAt
 }
 
-model Order {
-  id               String    @id @default(cuid())
-  userId           String?
-  user             User?     @relation(fields: [userId], references: [id])
-  amount           Float
-  currency         String    @default("INR")
-  status           String    @default("PENDING") // PENDING, PAID, FAILED
-  razorpayOrderId       String?   @unique
-  razorpayPaymentId     String?   @unique
-  stripeSessionId       String?   @unique
-  stripePaymentIntentId String?   @unique
-  createdAt             DateTime  @default(now())
-  updatedAt             DateTime  @updatedAt
+model DoctorSchedule {
+  id        String   @id @default(cuid())
+  doctorId  String
+  doctor    User     @relation(fields: [doctorId], references: [id], onDelete: Cascade)
+  dayOfWeek Int      // 0 = Sunday, 1 = Monday, ... 6 = Saturday
+  startTime String   // e.g. "09:00" in doctor's local time
+  endTime   String   // e.g. "12:00" in doctor's local time
+  
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([doctorId, dayOfWeek])
+}
+
+model DoctorBlockedTime {
+  id           String   @id @default(cuid())
+  doctorId     String
+  doctor       User     @relation(fields: [doctorId], references: [id], onDelete: Cascade)
+  title        String   // e.g. "Lunch & Clinical Admin", "Public Holiday"
+  startTimeUtc DateTime
+  endTimeUtc   DateTime
+  
+  createdAt    DateTime @default(now())
+
+  @@index([doctorId, startTimeUtc, endTimeUtc])
+}
+
+model Appointment {
+  id              String   @id @default(cuid())
+  doctorId        String
+  doctor          User     @relation("DoctorAppointments", fields: [doctorId], references: [id], onDelete: Cascade)
+  patientId       String
+  patient         User     @relation("PatientAppointments", fields: [patientId], references: [id], onDelete: Cascade)
+  
+  startTimeUtc    DateTime
+  endTimeUtc      DateTime
+  durationMinutes Int      // 15, 30, 60
+  status          String   @default("CONFIRMED") // "CONFIRMED" | "CANCELLED"
+  reason          String?
+  idempotencyKey  String?  @unique
+
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  @@index([doctorId, startTimeUtc])
+  @@index([patientId, startTimeUtc])
+}
+
+model AuditLog {
+  id          String   @id @default(cuid())
+  actorId     String?
+  actor       User?    @relation(fields: [actorId], references: [id], onDelete: SetNull)
+  action      String   // "BOOKED" | "CANCELLED" | "RESCHEDULED" | "BLOCKED_TIME" | "UNBLOCKED_TIME" | "HOURS_UPDATED" | "LOGIN"
+  description String
+  metadata    String?  // JSON serialized extra details
+  createdAt   DateTime @default(now())
 }
